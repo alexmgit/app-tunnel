@@ -1,0 +1,4 @@
+/bin/
+/data/subdomains.txt
+*.log
+.DS_Store
