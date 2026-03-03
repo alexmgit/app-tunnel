@@ -37,17 +37,9 @@ cp .env.compose.example .env.compose
 
 ### 3) Запустите стек
 
-Совместимый вариант (работает даже на средах без `--env-file`):
-
 ```bash
 cp .env.compose .env
 docker compose up -d --build
-```
-
-Если у вас поддерживается флаг `--env-file`:
-
-```bash
-docker compose --env-file .env.compose up -d --build
 ```
 
 ### 4) Запустите клиент
@@ -64,8 +56,6 @@ LOCAL_FORWARD_ADDR="127.0.0.1:3000" \
 
 - Только HTTP/HTTPS (HTTP/1.1), без TCP/UDP raw.
 - Нет авторизации.
-- ACME не реализован внутри Go-сервера (TLS рекомендуется завершать внешним прокси, например Caddy).
-- Один туннельный коннект обслуживает один запрос за раз (масштабирование через pool).
 
 ## Ручной запуск и сборка
 
