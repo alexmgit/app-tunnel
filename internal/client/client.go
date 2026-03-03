@@ -62,7 +62,12 @@ func (c *Client) Register() (protocol.RegisterResponse, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return protocol.RegisterResponse{}, err
 	}
-	c.log.Infof("registered subdomain=%s domain=%s", response.Subdomain, response.Domain)
+	publicURL := buildPublicURL(response.Subdomain, response.Domain)
+	if publicURL == "" {
+		c.log.Infof("registered subdomain=%s domain=%s", response.Subdomain, response.Domain)
+	} else {
+		c.log.Infof("registered subdomain=%s domain=%s url=%s", response.Subdomain, response.Domain, publicURL)
+	}
 	return response, nil
 }
 
@@ -140,4 +145,11 @@ func (c *Client) forwardToLocal(req *http.Request) (*http.Response, error) {
 func backoff(duration time.Duration) {
 	timer := time.NewTimer(duration)
 	<-timer.C
+}
+
+func buildPublicURL(subdomain, domain string) string {
+	if subdomain == "" || domain == "" {
+		return ""
+	}
+	return fmt.Sprintf("https://%s.%s", subdomain, domain)
 }
