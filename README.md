@@ -49,6 +49,8 @@ LOG_LEVEL="info" \
 ./bin/client
 ```
 
+`CONN_POOL_SIZE` необязателен, по умолчанию используется `4`.
+
 ## Сборка из исходников
 
 ```bash
@@ -157,7 +159,6 @@ docker run --rm \
   -e SERVER_ADDR="example.com" \
   -e LOCAL_FORWARD_ADDR="host.docker.internal:3000" \
   -e REQUESTED_SUBDOMAIN="" \
-  -e CONN_POOL_SIZE="2" \
   -e DIAL_TIMEOUT="10s" \
   -e LOG_LEVEL="info" \
   app-tunnel-client

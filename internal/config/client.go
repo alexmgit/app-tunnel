@@ -29,7 +29,7 @@ func LoadClientConfig() (ClientConfig, error) {
 	}
 
 	requestedSubdomain := OptionalString("REQUESTED_SUBDOMAIN")
-	connPoolSize, err := RequireInt("CONN_POOL_SIZE")
+	connPoolSize, err := OptionalInt("CONN_POOL_SIZE", 4)
 	if err != nil {
 		return ClientConfig{}, err
 	}

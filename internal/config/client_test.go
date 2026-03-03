@@ -9,7 +9,6 @@ import (
 func TestLoadClientConfigFromServerAddr(t *testing.T) {
 	t.Setenv("SERVER_ADDR", "example.com")
 	t.Setenv("LOCAL_FORWARD_ADDR", "127.0.0.1:3000")
-	t.Setenv("CONN_POOL_SIZE", "2")
 	t.Setenv("DIAL_TIMEOUT", "10s")
 
 	cfg, err := LoadClientConfig()
@@ -22,6 +21,9 @@ func TestLoadClientConfigFromServerAddr(t *testing.T) {
 	}
 	if cfg.ServerTunnelAddr != "example.com:8081" {
 		t.Fatalf("unexpected tunnel addr: %s", cfg.ServerTunnelAddr)
+	}
+	if cfg.ConnPoolSize != 4 {
+		t.Fatalf("unexpected pool size: %d", cfg.ConnPoolSize)
 	}
 	if cfg.DialTimeout != 10*time.Second {
 		t.Fatalf("unexpected timeout: %v", cfg.DialTimeout)

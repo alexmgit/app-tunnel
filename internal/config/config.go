@@ -48,6 +48,18 @@ func OptionalString(key string) string {
 	return os.Getenv(key)
 }
 
+func OptionalInt(key string, fallback int) (int, error) {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback, nil
+	}
+	parsed, err := strconv.Atoi(value)
+	if err != nil {
+		return 0, fmt.Errorf("invalid int for %s: %w", key, err)
+	}
+	return parsed, nil
+}
+
 func OptionalDuration(key string, fallback time.Duration) (time.Duration, error) {
 	value := os.Getenv(key)
 	if value == "" {
