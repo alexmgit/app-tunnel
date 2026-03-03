@@ -28,3 +28,26 @@ func TestExtractSubdomain(t *testing.T) {
 		}
 	}
 }
+
+func TestIsAllowedCaddyHost(t *testing.T) {
+	domain := "example.com"
+
+	cases := []struct {
+		host string
+		ok   bool
+	}{
+		{"example.com", true},
+		{"control.example.com", true},
+		{"abc.example.com", true},
+		{"foo.bar.example.com", false},
+		{"example.org", false},
+		{"", false},
+	}
+
+	for _, tc := range cases {
+		got := isAllowedCaddyHost(tc.host, domain)
+		if got != tc.ok {
+			t.Fatalf("host %q expected ok=%v got=%v", tc.host, tc.ok, got)
+		}
+	}
+}

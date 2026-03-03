@@ -62,6 +62,24 @@ func (s *Server) ControlHandler(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(response)
 }
 
+func (s *Server) CaddyAskHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	host := r.URL.Query().Get("domain")
+	if host == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !isAllowedCaddyHost(host, s.domain) {
+		s.log.Warnf("caddy ask denied host=%s", host)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func (s *Server) HandleTunnel(conn net.Conn) {
 	reader := bufio.NewReader(conn)
 	line, err := reader.ReadString('\n')
@@ -153,6 +171,19 @@ func extractSubdomain(host string, domain string) (string, bool) {
 	return trimmed, true
 }
 
+func isAllowedCaddyHost(host string, domain string) bool {
+	host = strings.ToLower(stripPort(strings.TrimSpace(host)))
+	domain = strings.ToLower(strings.TrimSpace(domain))
+	if host == "" || domain == "" {
+		return false
+	}
+	if host == domain || host == "control."+domain {
+		return true
+	}
+	_, ok := extractSubdomain(host, domain)
+	return ok
+}
+
 func stripPort(host string) string {
 	if strings.Contains(host, "]") {
 		return host
@@ -232,6 +263,14 @@ func NewProxyMux(proxyHandler http.Handler, controlHandler http.Handler) *http.S
 	mux := http.NewServeMux()
 	mux.Handle("/register", controlHandler)
 	mux.Handle("/", proxyHandler)
+	return mux
+}
+
+func NewControlMux(registerHandler http.Handler, caddyAskHandler http.Handler) *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.Handle("/register", registerHandler)
+	mux.Handle("/caddy/allow", caddyAskHandler)
+	mux.Handle("/", http.NotFoundHandler())
 	return mux
 }
 

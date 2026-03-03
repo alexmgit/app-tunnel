@@ -46,7 +46,7 @@ func main() {
 		errCh <- server.StartTunnelListener(cfg.TunnelAddr, svc.HandleTunnel, logger)
 	}()
 	go func() {
-		controlMux := server.NewProxyMux(httpNotFoundHandler{}, httpHandlerFunc(svc.ControlHandler))
+		controlMux := server.NewControlMux(httpHandlerFunc(svc.ControlHandler), httpHandlerFunc(svc.CaddyAskHandler))
 		logger.Infof("control listener starting addr=%s", cfg.ControlAddr)
 		errCh <- server.StartHTTPServer(cfg.ControlAddr, controlMux)
 	}()
