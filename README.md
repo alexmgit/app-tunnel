@@ -60,13 +60,6 @@ LOCAL_FORWARD_ADDR="127.0.0.1:3000" \
 ./bin/client
 ```
 
-Клиент автоматически использует:
-- `SERVER_CONTROL_URL=https://control.<SERVER_ADDR>/register`
-- `SERVER_TUNNEL_ADDR=<SERVER_ADDR>:8081`
-
-После регистрации в логах будет полный публичный URL:
-- `url=https://<subdomain>.<domain>`
-
 ## Ограничения текущей версии
 
 - Только HTTP/HTTPS (HTTP/1.1), без TCP/UDP raw.
@@ -112,8 +105,6 @@ DIAL_TIMEOUT="10s" \
 LOG_LEVEL="info" \
 ./bin/client
 ```
-
-`CONN_POOL_SIZE` необязателен, по умолчанию `4`.
 
 ## Ручной запуск через Docker (без compose)
 
