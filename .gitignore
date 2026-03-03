@@ -2,3 +2,5 @@
 /data/subdomains.txt
 *.log
 .DS_Store
+.env
+.env.compose
