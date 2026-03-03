@@ -1,0 +1,45 @@
+{
+	email {$ACME_EMAIL}
+}
+
+# Control API for clients:
+# https://control.<DOMAIN>/register
+control.{$DOMAIN} {
+	reverse_proxy app-tunnel-server:8080
+}
+
+# Public traffic for tunneled apps:
+# https://<subdomain>.<DOMAIN>
+:443 {
+	tls {
+		on_demand
+	}
+
+	@root host {$DOMAIN}
+	@sub host *.{$DOMAIN}
+
+	handle @root {
+		reverse_proxy app-tunnel-server:8082
+	}
+
+	handle @sub {
+		reverse_proxy app-tunnel-server:8082
+	}
+
+	respond "unknown host" 404
+}
+
+:80 {
+	@root host {$DOMAIN}
+	@sub host *.{$DOMAIN}
+
+	handle @root {
+		reverse_proxy app-tunnel-server:8082
+	}
+
+	handle @sub {
+		reverse_proxy app-tunnel-server:8082
+	}
+
+	respond "unknown host" 404
+}

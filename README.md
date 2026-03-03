@@ -87,6 +87,48 @@ curl -H "Host: <subdomain>.example.com" http://127.0.0.1:8082/
 
 ## Docker
 
+### Docker Compose (домен + SSL одной командой)
+
+1. Укажите DNS:
+- `A` запись для `example.com` на IP сервера.
+- `A` wildcard запись для `*.example.com` на тот же IP.
+
+2. Создайте `.env.compose`:
+
+```bash
+DOMAIN="example.com"
+ACME_EMAIL="admin@example.com"
+TUNNEL_PORT="8081"
+SUBDOMAIN_LENGTH="6"
+TUNNEL_TIMEOUT="30s"
+LOG_LEVEL="info"
+```
+
+3. Запустите:
+
+```bash
+docker compose --env-file .env.compose up -d --build
+```
+
+4. Клиент подключается так:
+
+```bash
+SERVER_ADDR="example.com"
+LOCAL_FORWARD_ADDR="127.0.0.1:3000"
+```
+
+По умолчанию клиент сам соберёт:
+- `SERVER_CONTROL_URL=https://control.<DOMAIN>/register`
+- `SERVER_TUNNEL_ADDR=<DOMAIN>:8081`
+
+Опционально можно переопределить:
+- `SERVER_CONTROL_URL` или `SERVER_CONTROL_HOST`/`SERVER_CONTROL_SCHEME`
+- `SERVER_TUNNEL_ADDR` или `SERVER_TUNNEL_PORT`
+
+Примечание:
+- SSL завершается в Caddy (Let's Encrypt).
+- Для `https://<subdomain>.example.com` используется on-demand TLS (сертификат выпускается при первом HTTPS запросе к новому поддомену).
+
 ### Сервер
 
 ```bash
@@ -112,8 +154,7 @@ docker run --rm \
 ```bash
 docker build -f Dockerfile.client -t app-tunnel-client .
 docker run --rm \
-  -e SERVER_CONTROL_URL="http://server-host:8080/register" \
-  -e SERVER_TUNNEL_ADDR="server-host:8081" \
+  -e SERVER_ADDR="example.com" \
   -e LOCAL_FORWARD_ADDR="host.docker.internal:3000" \
   -e REQUESTED_SUBDOMAIN="" \
   -e CONN_POOL_SIZE="2" \

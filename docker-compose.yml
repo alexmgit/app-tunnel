@@ -1,0 +1,44 @@
+services:
+  app-tunnel-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: app-tunnel-server
+    restart: unless-stopped
+    environment:
+      CONTROL_ADDR: ":8080"
+      TUNNEL_ADDR: ":8081"
+      HTTP_ADDR: ":8082"
+      HTTPS_ADDR: ""
+      TLS_CERT_FILE: ""
+      TLS_KEY_FILE: ""
+      DOMAIN: ${DOMAIN}
+      SUBDOMAIN_STORE_PATH: "/data/subdomains.txt"
+      SUBDOMAIN_LENGTH: ${SUBDOMAIN_LENGTH:-6}
+      TUNNEL_TIMEOUT: ${TUNNEL_TIMEOUT:-30s}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      - ./data:/data
+    ports:
+      - "${TUNNEL_PORT:-8081}:8081"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: app-tunnel-caddy
+    restart: unless-stopped
+    depends_on:
+      - app-tunnel-server
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
